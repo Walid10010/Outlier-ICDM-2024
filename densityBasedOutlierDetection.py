@@ -7,7 +7,7 @@ from detectNormalRegion import expandNormalRegion
 from sortedcontainers import SortedDict
 from collections import OrderedDict
 import numpy as np
-
+import  pynndescent
 index_i = {}
 indexPrim = {}
 indexaverage = {}
@@ -24,13 +24,16 @@ final_label = []
 outlier_key_set = set([])
 all_n_distance = None
 y_score = None
+first_time = False
+save_mmn_index = None
 import functools
-
+label_to_sigma = None
 n_Size = None
-
+sigma_list = None
 
 def expansionR(min1_):
-    global label_counter
+    global label_counter, label_to_sigma, sigma_list
+   # print('expand#')
     start_punkt = epsilon_abschaetzen()  # sigma = name !
     try:
         epsilon = index_kdistance[start_punkt]
@@ -41,6 +44,8 @@ def expansionR(min1_):
         expandNormalRegion(start_punkt, epsilon, index_d2punkt, index_i)
     start_punkt = index_d2punkt[start_punkt]
     density_list = []
+    label_to_sigma[label_counter] = start_punkt
+    sigma_list.append(start_punkt.corr.tolist())
     for nachbar in start_punkt.epsilon_neigh:
         try:
             delete_set.add(indexPrim[index_i[nachbar]])
@@ -73,7 +78,7 @@ def str_to_name(datenpunkt):
 
 def init_all():
     global index_i, indexPrim, indexaverage, indices, index_kdistance, index_label, index_d2punkt, delete_set, \
-        noise_set, label_counter, daten_matrix, final_label, outlier_key_set, sorted_index_kdistance, all_n_distance
+        noise_set, label_counter, daten_matrix, final_label, outlier_key_set, sorted_index_kdistance, all_n_distance,label_to_sigma, sigma_list
     index_i = {}
     indexPrim = {}
     indexaverage = {}
@@ -89,19 +94,25 @@ def init_all():
     outlier_key_set = set([])
     sorted_index_kdistance = SortedDict()
     all_n_distance = None
+    label_to_sigma = {}
+    sigma_list = []
 
 
 def k_nachbaren_berechnen(X, minClusterSize, liste_von_D2Punkte):
     init_all()
     global n_Size, all_n_distance
     n_Size = minClusterSize
+    #print('start knn')
     try:
         global daten_matrix
         daten_matrix = X
-        global distances, indices
+        global distances, indices, save_mmn_index
         minClusterSize = minClusterSize
         metricNN = NearestNeighbors(n_neighbors=minClusterSize + 1, leaf_size=minClusterSize + 1).fit(X)
+        # metricNN = pynndescent.NNDescent(X, n_neighbors=minClusterSize + 1)
+        # indices, distances = metricNN.query(X, k=minClusterSize +1)
         distances, indices = metricNN.kneighbors(X)
+        save_mmn_index = metricNN
         all_n_distance = distances
         for i in range(len(distances)):
             str = str_to_name(X[i])
@@ -126,6 +137,7 @@ def k_nachbaren_berechnen(X, minClusterSize, liste_von_D2Punkte):
         for key in sorted_index_kdistance:
             sorted_index_kdistance[key] = sorted(sorted_index_kdistance[key], key=functools.cmp_to_key(compare_))
             sorted_index_kdistance[key] = OrderedDict.fromkeys(sorted_index_kdistance[key])
+        #print('end knn')
         return True
     except ValueError:
         return False
@@ -247,12 +259,45 @@ def compare_(d1, d2):
     return 1
 
 
+def predict(X):
+     global save_mmn_index, n_Size
+     distances, indices = 	save_mmn_index.kneighbors(X)
+     # distances = np.average(distances, axis=-1)
+     distances = distances[:, -1]
+     max_dis = max(distances)
+     y_score = []
+     for ii, daten_punkt in enumerate(X):
+         count = 0
+         for n in indices[ii]:
+             if n in outlier_key_set:
+                 count += 1
+         y_score.append(0.5*count / n_Size  + 0.5*distances[ii]/max_dis)
+         # y_score.append( count / n_Size)
+     global final_label
+     return np.array(y_score).reshape(-1)
+
 def zeichne():
     y_label = []
     x_label = []
-    global daten_matrix, indexPrim
-    for daten_punkt in daten_matrix:
+    yyscore = []
+    from sklearn.neighbors import KDTree
+    global daten_matrix, indexPrim,label_to_sigma, sigma_list, index_label
+    sigma_list = np.array(sigma_list)
+    kd  = KDTree(sigma_list)
+    for idx, daten_punkt in enumerate(daten_matrix):
         name = str_to_name(daten_punkt)
+        if name in index_label:
+         label =  index_label[name]
+         label_point = label_to_sigma[label]
+         dis, _ = kd.query([daten_punkt], k=1)
+         # print('abnormal', (dis[-1][0]))
+         yyscore.append((dis[-1][0]))
+         # yyscore.append(np.linalg.norm(label_point.corr - daten_punkt))
+        # print ('norma', np.linalg.norm(label_point.corr - daten_punkt))
+        else:
+           dis, _ = kd.query([daten_punkt], k=1)
+          # print('abnormal', (dis[-1][0]))
+           yyscore.append((dis[-1][0]))
         if name in index_label:
             x_label.append(daten_punkt)
             y_label.append(index_label[name])
@@ -265,8 +310,11 @@ def zeichne():
 
     global n_Size, y_score
     global distances
-    distances  = np.average(distances, axis=-1)
-    #distances = distances[:, -1]
+    max_score = max(yyscore)
+    yyscore = [i/max_score for i in yyscore]
+    #distances  = np.average(distances, axis=-1)
+    distances = distances[:, -1]
+
     max_dis = max(distances)
     y_score = []
     for ii, daten_punkt in enumerate(daten_matrix):
@@ -280,15 +328,15 @@ def zeichne():
         for n in d2Point.neigh:
             if n in outlier_key_set: count += 1
 
-        y_score.append(0.5*count / n_Size  + 0.5*distances[ii]/max_dis)
-       # y_score.append((count / n_Size ))
+
+        #y_score.append(0.5*count / n_Size  + 0.5*distances[ii]/max_dis)
+        y_score.append((yyscore[ii] + count / n_Size))
 
 
     y_pred_array = np.array(y_label).reshape(-1)
     y_pred_array[y_pred_array == 0] = -1
     y_pred_array[y_pred_array > 0] = 0
     y_pred_array[y_pred_array == -1] = 1
-    print('hier')
 
     threshold_ = np.percentile(distances,100 * (1 - 0.1))
     labels_ = (distances > threshold_).astype(
@@ -296,4 +344,5 @@ def zeichne():
     global final_label
     final_label = y_pred_array
     y_score = np.array(y_score).reshape(-1)
+   # y_score = np.array(yyscore).reshape(-1)
     #y_score  = distances

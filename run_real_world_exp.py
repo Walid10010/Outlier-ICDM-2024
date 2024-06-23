@@ -17,11 +17,12 @@ from Util_ import getData
 algo_dic = {'LOF':LOF(), 'ABOD':ABOD(), 'IForest':IForest(random_state=45), 'INNE': INNE(random_state=45), 'LODA':LODA(),
             'HBOS':HBOS(), 'DeepSVD':DeepSVDD(), 'ALAD':ALAD(), 'SOGAAL':SO_GAAL(), 'MOGAAL': MO_GAAL()}
 
-name = '28_pendigits.npz'
+name = '26_optdigits.npz'
 data = np.load('/Users/walid/Downloads/CSS Animation/DODO_PKDD/Classical/{}'.format(name),
                allow_pickle=True)
 X, Y = data['X'], data['y']
-
+from  sklearn.preprocessing import MinMaxScaler
+X= MinMaxScaler().fit_transform(X)
 print('Evaluation Outlier Detection:')
 data = 'Pathto'
 #X,  Y = getData(data)
