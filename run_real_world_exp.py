@@ -1,21 +1,20 @@
 from pyod.models.abod import ABOD
 
 from pyod.models.deep_svdd import DeepSVDD
-from pyod.models.so_gaal import SO_GAAL
 from pyod.models.hbos import HBOS
 from pyod.models.loda import LODA
 from pyod.models.lof import LOF
-from pyod.models.inne import  INNE
 from pyod.models.iforest import  IForest
-from pyod.models.alad import ALAD
-from pyod.models.mo_gaal import MO_GAAL
+from pyod.models.cof import COF
+from pyod.models.cblof import CBLOF
+from sklearn.cluster import DBSCAN, HDBSCAN
 from sklearn.metrics import roc_auc_score as ROC
 import numpy as np
 
 # np.random.seed(45)
 from Util_ import getData
-algo_dic = {'LOF':LOF(), 'ABOD':ABOD(), 'IForest':IForest(random_state=45), 'INNE': INNE(random_state=45), 'LODA':LODA(),
-            'HBOS':HBOS(), 'DeepSVD':DeepSVDD(), 'ALAD':ALAD(), 'SOGAAL':SO_GAAL(), 'MOGAAL': MO_GAAL()}
+algo_dic = {'LOF':LOF(), 'COF':COF(), 'IForest':IForest(), 'LODA':LODA(),
+            'CBLOF':CBLOF(), 'DBSCAN':DBSCAN(), 'HDBSCAN':HDBSCAN()}
 
 name = '26_optdigits.npz'
 data = np.load('/Users/walid/Downloads/CSS Animation/DODO_PKDD/Classical/{}'.format(name),
