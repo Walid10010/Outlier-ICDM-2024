@@ -25,8 +25,7 @@ algo_dic = {'DIDO': DIDO,   'LOF':LOF, 'COF':COF, 'IForest':IForest, 'LODA':LODA
             'CBLOF':CBLOF, 'DBSCAN':DBSCAN, 'HDBSCAN': hdbscan.HDBSCAN,  'DAO': dao, 'SLOF':slof}
             #'HDBSCAN':HDBSCAN()}
 
-algo_dic = {'DAO':dao}
-a = LOF()
+
 import glob
 
 for algo_name, algo in algo_dic.items():
@@ -66,16 +65,20 @@ for algo_name, algo in algo_dic.items():
 
 
         elif algo_name in ['DBSCAN', 'HDBSCAN']:
-            algo_ = DBSCAN()
-            y_pred = y_prob = algo_.fit_predict(X)
-            y_pred[y_pred >= 0] = -2
-            y_pred[y_pred == -1] = 1
-            y_pred[y_pred == -2] = 0
-            roc_score_value = roc_auc_score(Y, y_pred)
-            print('outlier algo',algo_name,  'data name', dataname, 'roc-score:', roc__)
-            print('outlier algo',algo_name,  'data name', dataname, 'ap-score:', ap__)
+            for k in [20, int((log2(X.shape[0])) ** 2) + 5]:
+                algo_ = algo(min_samples=k)
+                y_pred = y_prob = algo_.fit_predict(X)
+                y_pred[y_pred >= 0] = -2
+                y_pred[y_pred == -1] = 1
+                y_pred[y_pred == -2] = 0
+                roc__ = roc_auc_score(Y, y_pred)
+                ap__ = average_precision_score(Y, y_pred)
 
-        elif algo_name in ['DAO', 'SLOF']:
+                print('outlier algo', algo_name, 'data name', dataname, 'roc-score:', roc__)
+                print('outlier algo', algo_name, 'data name', dataname, 'ap-score:', ap__)
+
+
+        elif algo_name in ['SLOF']:
             n, d = X.shape
             n = min(int((log2(X.shape[0])) ** 2) + 5, n)
             nn = NearestNeighbors(n_neighbors=n + 1).fit(X)
@@ -90,6 +93,7 @@ for algo_name, algo in algo_dic.items():
                 print('outlier algo', algo_name, 'data name', dataname, 'roc-score:', roc__)
                 print('outlier algo', algo_name, 'data name', dataname, 'ap-score:', ap__)
         elif algo_name in ['DAO']:
+            print(dataname)
             n, d = X.shape
             n = min(int((log2(X.shape[0])) ** 2) + 5, n)
             nn = NearestNeighbors(n_neighbors=n + 1).fit(X)
