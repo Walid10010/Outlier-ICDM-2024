@@ -1,6 +1,6 @@
-# DIDO
+# DDIO
 
- Python implementation of [DIDO] algorithm. 
+ Python implementation of [DDIO] algorithm. 
 
 
 ## Environment
