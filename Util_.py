@@ -8,7 +8,7 @@ from readFile import read_file_lec
 from sklearn.preprocessing import MinMaxScaler
 from math import log2
 
-def DIDO(X):
+def DDIO(X):
     para = int((log2(X.shape[0]))**2) +5, 1, 0.
     liste_von_D2Punkte = []
     k_nachbaren_berechnen(X, para[0], liste_von_D2Punkte)
@@ -23,7 +23,7 @@ def DIDO(X):
 # X, Y = np.loadtxt('Dataset/SyntheticNoise1Data'), np.loadtxt('Dataset/SyntheticNoise1Label') ## MODIFY
 #
 #
-# y_pred = DIDO(X)
+# y_pred = DDIO(X)
 #
 # y_pred = densityBasedOutlierDetection.final_label
 # y_score = densityBasedOutlierDetection.y_score
@@ -66,7 +66,7 @@ def getData(data):
 
 # X, Y = getData('musk')
 #
-# y_pred = DIDO(X)
+# y_pred = DDIO(X)
 #
 # y_pred = densityBasedOutlierDetection.final_label
 # y_score = densityBasedOutlierDetection.y_score

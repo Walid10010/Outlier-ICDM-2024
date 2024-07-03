@@ -13,7 +13,7 @@ from sklearn.metrics import roc_auc_score as ROC, average_precision_score
 
 from sklearn.metrics import roc_auc_score
 import numpy as np
-from Util_ import DIDO
+from Util_ import DDIO
 from estimators import mle
 from math import log2
 # np.random.seed(45)
@@ -21,7 +21,7 @@ import sys
 from sklearn.neighbors import NearestNeighbors
 from algorithms import  slof, dao
 from Util_ import getData
-algo_dic = {'DIDO': DIDO,   'LOF':LOF, 'COF':COF, 'IForest':IForest, 'LODA':LODA,
+algo_dic = {'DDIO': DDIO, 'LOF':LOF, 'COF':COF, 'IForest':IForest, 'LODA':LODA,
             'CBLOF':CBLOF, 'DBSCAN':DBSCAN, 'HDBSCAN': hdbscan.HDBSCAN,  'DAO': dao, 'SLOF':slof}
             #'HDBSCAN':HDBSCAN()}
 
@@ -35,8 +35,8 @@ for algo_name, algo in algo_dic.items():
         X, Y = data['X'], data['y']
         from sklearn.preprocessing import MinMaxScaler
         X = MinMaxScaler().fit_transform(X)
-        if algo_name == 'DIDO':
-            y_pred = DIDO(X)
+        if algo_name == 'DDIO':
+            y_pred = DDIO(X)
             import densityBasedOutlierDetection
             from sklearn.metrics import roc_auc_score
             y_score = densityBasedOutlierDetection.y_score
