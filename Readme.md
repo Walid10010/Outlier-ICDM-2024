@@ -13,7 +13,6 @@ Before running the experiment please install
 The  dataset used in paper can be found in the  Classical folder. [https://github.com/Minqi824/ADBench]
 
 
-## Demo
-## Update
+## Demo 
 Please re run run_real_world_exp.py to reproduce the experiments
 

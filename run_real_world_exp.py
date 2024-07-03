@@ -41,7 +41,7 @@ for algo_name, algo in algo_dic.items():
             from sklearn.metrics import roc_auc_score
             y_score = densityBasedOutlierDetection.y_score
             print('outlier algo', algo_name, 'data name', dataname, 'roc-score:', roc_auc_score(Y, y_score))
-           
+
 
         elif  algo_name in ['LOF', 'COF']:
             for k in [20, int((log2(X.shape[0])) ** 2) + 5]:
