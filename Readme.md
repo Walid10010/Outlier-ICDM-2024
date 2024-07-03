@@ -14,6 +14,6 @@ The  dataset used in paper can be found in the  Classical folder. [https://githu
 
 
 ## Demo
-
-One can find a demo in run_real_world_exp.py to reproduce the experiments.
+## Update
+Please re run run_real_world_exp.py to reproduce the experiments
 
