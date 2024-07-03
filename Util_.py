@@ -9,11 +9,11 @@ from sklearn.preprocessing import MinMaxScaler
 from math import log2
 
 def DDIO(X):
-    para = int((log2(X.shape[0]))**2) +5, 1, 0.
+    para = int((log2(X.shape[0]))) ** 2 + 5, 1, 0.
     liste_von_D2Punkte = []
     k_nachbaren_berechnen(X, para[0], liste_von_D2Punkte)
     try:
-        return expansionR(para[1])
+        return expansionR(para[0])
     except Exception as E:
         print(E)
         return np.array([0]*X.shape[0])

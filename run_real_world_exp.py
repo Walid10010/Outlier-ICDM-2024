@@ -25,7 +25,7 @@ algo_dic = {'DDIO': DDIO, 'LOF':LOF, 'COF':COF, 'IForest':IForest, 'LODA':LODA,
             'CBLOF':CBLOF, 'DBSCAN':DBSCAN, 'HDBSCAN': hdbscan.HDBSCAN,  'DAO': dao, 'SLOF':slof}
             #'HDBSCAN':HDBSCAN()}
 
-
+# algo_dic = {'LOF':LOF}
 import glob
 
 for algo_name, algo in algo_dic.items():
@@ -41,6 +41,8 @@ for algo_name, algo in algo_dic.items():
             from sklearn.metrics import roc_auc_score
             y_score = densityBasedOutlierDetection.y_score
             print('outlier algo', algo_name, 'data name', dataname, 'roc-score:', roc_auc_score(Y, y_score))
+            print('outlier algo', algo_name, 'data name', dataname, 'roc-score:', average_precision_score(Y, y_score))
+
         elif  algo_name in ['LOF', 'COF']:
             for k in [20, int((log2(X.shape[0])) ** 2) + 5]:
                 algo_ = algo(n_neighbors=k)
